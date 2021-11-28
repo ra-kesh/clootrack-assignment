@@ -1,26 +1,18 @@
 import "./App.css";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Chart from "./components/Chart";
-import axios from "axios";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchChartData } from "./features/chartService";
+import { changeChartType, changeChartElememts } from "./features/chartSlice";
 
 function App() {
-  const [chartData, setChartData] = useState([]);
-  const [type, setType] = useState(null);
-  const [elements, setElements] = useState([]);
+  const { chartData, elements, type } = useSelector((state) => state.chart);
 
-  const fetchData = async () => {
-    try {
-      const { data } = await axios.get(
-        "https://s3-ap-southeast-1.amazonaws.com/he-public-data/chart2986176.json"
-      );
-      setChartData(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    fetchData();
+    dispatch(fetchChartData());
+    // eslint-disable-next-line
   }, []);
 
   return (
@@ -32,10 +24,11 @@ function App() {
         {chartData.map(({ type, elements }, index) => (
           <>
             <button
+              key={index}
               className="toggleButton"
               onClick={() => {
-                setType(type);
-                setElements(elements);
+                dispatch(changeChartType(type));
+                dispatch(changeChartElememts(elements));
               }}
             >
               {index + 1}
@@ -45,6 +38,31 @@ function App() {
       </div>
 
       <div>
+        <div
+          style={{
+            marginBottom: "2rem",
+          }}
+        >
+          <div>
+            <span style={{ fontWeight: "bolder", marginRight: ".5rem" }}>
+              Type :{" "}
+            </span>
+            <span>{type}</span>
+          </div>
+
+          <div>
+            <span
+              style={{
+                fontWeight: "bolder",
+                marginRight: ".5rem",
+              }}
+            >
+              elements :{" "}
+            </span>
+            <span>{elements.toString()}</span>
+          </div>
+        </div>
+
         <Chart type={type} elements={elements} />
       </div>
     </div>
